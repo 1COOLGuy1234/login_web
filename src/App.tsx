@@ -1,44 +1,54 @@
-import React from 'react';
-import { Stack, Text, Link, FontWeights, IStackTokens, IStackStyles, ITextStyles } from '@fluentui/react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import {
+	Stack,
+	Text,
+	Link,
+	FontWeights,
+	IStackTokens,
+	IStackStyles,
+	ITextStyles,
+	TextField,
+	ITextFieldStyles,
+} from "@fluentui/react";
+import logo from "./logo.svg";
+import "./App.css";
+import { LogInButton } from "./LogInButton";
+import { LogIn } from "./LogIn";
+import { Operation } from "./Operation";
+import { renderContent } from "./model";
 
-const boldStyle: Partial<ITextStyles> = { root: { fontWeight: FontWeights.semibold } };
-const stackTokens: IStackTokens = { childrenGap: 15 };
-const stackStyles: Partial<IStackStyles> = {
-  root: {
-    width: '960px',
-    margin: '0 auto',
-    textAlign: 'center',
-    color: '#605e5c',
-  },
+const textFieldStyles: Partial<ITextFieldStyles> = {
+	fieldGroup: { width: 300 },
+};
+const narrowTextFieldStyles: Partial<ITextFieldStyles> = {
+	fieldGroup: { width: 100 },
+};
+const stackTokens = { childrenGap: 15 };
+
+const getRenderWhat: () => renderContent = () => {
+	const token = localStorage.getItem("token")?.substring(7);
+	if (token && token !== "undefined") {
+		return renderContent.Operation;
+	} else {
+		return renderContent.LogIn;
+	}
 };
 
 export const App: React.FunctionComponent = () => {
-  return (
-    <Stack horizontalAlign="center" verticalAlign="center" verticalFill styles={stackStyles} tokens={stackTokens}>
-      <img className="App-logo" src={logo} alt="logo" />
-      <Text variant="xxLarge" styles={boldStyle}>
-        Welcome to your Fluent UI app
-      </Text>
-      <Text variant="large">For a guide on how to customize this project, check out the Fluent UI documentation.</Text>
-      <Text variant="large" styles={boldStyle}>
-        Essential links
-      </Text>
-      <Stack horizontal tokens={stackTokens} horizontalAlign="center">
-        <Link href="https://developer.microsoft.com/en-us/fluentui#/get-started/web">Docs</Link>
-        <Link href="https://stackoverflow.com/questions/tagged/office-ui-fabric">Stack Overflow</Link>
-        <Link href="https://github.com/microsoft/fluentui/">Github</Link>
-        <Link href="https://twitter.com/fluentui">Twitter</Link>
-      </Stack>
-      <Text variant="large" styles={boldStyle}>
-        Design system
-      </Text>
-      <Stack horizontal tokens={stackTokens} horizontalAlign="center">
-        <Link href="https://developer.microsoft.com/en-us/fluentui#/styles/web/icons">Icons</Link>
-        <Link href="https://developer.microsoft.com/en-us/fluentui#/styles/web">Styles</Link>
-        <Link href="https://aka.ms/themedesigner">Theme designer</Link>
-      </Stack>
-    </Stack>
-  );
+	let initIsRenderWhat = getRenderWhat();
+
+	const [isRenderWhat, setIsRenderWhat] = useState(initIsRenderWhat);
+
+	// if (App is rendered || dependencies changed) {
+	// 	useEffect
+	// }
+
+	return (
+		<div>
+			{isRenderWhat === renderContent.LogIn && (
+				<LogIn jumpToFunc={setIsRenderWhat} />
+			)}
+			{isRenderWhat === renderContent.Operation && <Operation />}
+		</div>
+	);
 };
