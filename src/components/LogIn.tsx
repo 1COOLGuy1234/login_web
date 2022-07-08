@@ -1,22 +1,11 @@
 import React, { useState } from "react";
-import {
-	Stack,
-	Text,
-	Link,
-	FontWeights,
-	IStackTokens,
-	IStackStyles,
-	ITextStyles,
-	TextField,
-	ITextFieldStyles,
-} from "@fluentui/react";
-import "./App.css";
+import { Stack, TextField, ITextFieldStyles } from "@fluentui/react";
+import "../App.css";
 import { LogInButton } from "./LogInButton";
-import { renderContent } from "./model";
-
-export interface ILogInProps {
-	jumpToFunc: (jumpTo: renderContent) => void;
-}
+import { renderContent } from "../model/renderContent";
+import { updateRenderWhat } from "../mutators/updateRenderWhat";
+import { store } from "../store/store";
+import { SuccessExample, ErrorExample } from "./MessageBar";
 
 const textFieldStyles: Partial<ITextFieldStyles> = {
 	fieldGroup: { width: 300 },
@@ -24,9 +13,13 @@ const textFieldStyles: Partial<ITextFieldStyles> = {
 
 const stackTokens = { childrenGap: 15 };
 
-export const LogIn: React.FunctionComponent<ILogInProps> = (props) => {
+export const LogIn: React.FunctionComponent = (props) => {
 	const [userNameValue, setUserNameValue] = useState("");
 	const [passWordValue, setPassWordValue] = useState("");
+	const [isLogInSuccess, setIsLogInSuccess] = useState<boolean | undefined>(
+		undefined
+	);
+	const [errorMsg, setErrorMsg] = useState("");
 
 	const onChangeFirstTextFieldValue = React.useCallback(
 		(
@@ -50,7 +43,8 @@ export const LogIn: React.FunctionComponent<ILogInProps> = (props) => {
 	const logInAction = async () => {
 		// check input
 		if (userNameValue.length === 0 || passWordValue.length === 0) {
-			alert("Your username or password is null");
+			setErrorMsg("Your username or password is null");
+			setIsLogInSuccess(false);
 			return;
 		}
 
@@ -69,11 +63,12 @@ export const LogIn: React.FunctionComponent<ILogInProps> = (props) => {
 		const token = data["data"];
 
 		if (data["code"] === 400) {
-			alert("Log in failed. Your username or password is wrong"); // TODO: use fluent UI notification
+			setErrorMsg("Login failed! Your username or password is wrong!");
+			setIsLogInSuccess(false);
 		} else {
-			alert("Log In successfully");
+			setIsLogInSuccess(true);
 			localStorage.setItem("token", `Bearer ${token}`);
-			props.jumpToFunc(renderContent.Operation);
+			updateRenderWhat(renderContent.Contacts);
 		}
 	};
 
@@ -94,6 +89,11 @@ export const LogIn: React.FunctionComponent<ILogInProps> = (props) => {
 				type="password"
 			/>
 			<LogInButton onClickAction={logInAction}></LogInButton>
+			{isLogInSuccess != undefined && isLogInSuccess === false && (
+				<div className="messageBar">
+					<ErrorExample msg={errorMsg} />
+				</div>
+			)}
 		</Stack>
 	);
 };
